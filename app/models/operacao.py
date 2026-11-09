@@ -15,6 +15,8 @@ from app.models.enums import (
 
 
 class Campanha(Base):
+    """Ação comercial (anúncio, parceria, evento) com orçamento, leads e visitas."""
+
     id = fields.CharField(max_length=40, primary_key=True)
     nome = fields.CharField(max_length=200)
     canal = fields.CharField(max_length=120, default="")

@@ -23,7 +23,9 @@ Ao subir, o container da API:
 3. carrega os arquivos de `seed/` se o banco estiver vazio;
 4. sobe a API em http://localhost:8000.
 
-A documentação interativa fica em http://localhost:8000/docs.
+A documentação fica em http://localhost:8000/docs (Swagger) e http://localhost:8000/redoc (ReDoc).
+Cada rota tem resumo, descrição, exemplos, o formato da resposta e os erros possíveis.
+O front também mostra essa documentação, na página **Documentação da API**.
 
 No compose de desenvolvimento, a pasta `app/` entra no container e a API recarrega a cada alteração.
 
@@ -51,10 +53,25 @@ No compose de desenvolvimento, a pasta `app/` entra no container e a API recarre
 | `/api/contratos`, `/api/profissionais`, `/api/campanhas` | Cadastro completo (listar, criar, editar, excluir) |
 | `GET` e `PUT /api/custos` | Custos fixos, impostos e comissões |
 | `GET` e `PUT /api/mercado/concorrentes`, `/api/mercado/social` | Coletas de mercado, no formato dos arquivos do front |
+| `GET /api/banco/esquema` | Tabelas, colunas, chaves, índices e relações do banco (alimenta o diagrama do front) |
+| `GET /api/banco/tabelas/{tabela}` | Linhas de uma tabela, com página, ordem e busca |
+| `POST /api/banco/consulta` | Roda uma consulta SQL só de leitura |
 
 Também há `GET` e `PUT /api/clinica`, para os dados da Santé e a meta de ocupação.
 
 Os campos usam camelCase, iguais aos do front (`espacoId`, `precoTurno`...).
+
+## Consultas ao banco (só leitura)
+
+As rotas `/api/banco/*` alimentam as páginas **Diagrama do banco** e **Tabelas e consultas** do front.
+Elas nunca usam a conexão principal da API:
+
+- abrem conexões próprias com o papel `sante_leitura`, criado pela migração `papel_somente_leitura`, que só tem `SELECT` e não pode trocar de papel;
+- a senha desse papel é aleatória e gerada a cada início da API (defina `BANCO_LEITURA_SENHA` se rodar vários workers);
+- cada consulta roda numa transação `READ ONLY`, sempre termina em `ROLLBACK` e tem limite de tempo (`BANCO_TEMPO_MS`, 5 s por padrão);
+- só um comando por vez, e no máximo 5.000 linhas na resposta.
+
+Para desligar a navegação e as consultas (o esquema continua disponível), use `BANCO_CONSULTAS=false`.
 
 ## Ligar o front
 

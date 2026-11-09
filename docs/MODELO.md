@@ -81,3 +81,9 @@ O cálculo fica em [app/services/capacidade.py](../app/services/capacidade.py) e
 
    O container também aplica as migrações pendentes sempre que sobe.
 4. Faça commit do arquivo novo em `migrations/models`.
+
+## Papel só de leitura
+
+A migração `papel_somente_leitura` cria o papel `sante_leitura`, com `SELECT` em todas as tabelas
+(inclusive as criadas depois). A ferramenta de consultas (`/api/banco/*`) conecta com ele, numa
+transação `READ ONLY`. Assim, o banco recusa qualquer escrita feita por ali, mesmo que a API tenha um erro.

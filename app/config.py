@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     cors_origin_regex: str = r"^http://(localhost|127\.0\.0\.1)(:\d+)?$"
     # carrega seed/*.json quando o banco está vazio
     seed_on_start: bool = True
+    # páginas "Tabelas e consultas" do front: ler linhas e rodar SELECT (sempre só leitura)
+    banco_consultas: bool = True
+    # tempo máximo de cada consulta, em milissegundos
+    banco_tempo_ms: int = 5000
+    # senha do papel sante_leitura; vazio = aleatória a cada início (use uma fixa com vários workers)
+    banco_leitura_senha: str = ""
 
     @property
     def cors_list(self) -> list[str]:

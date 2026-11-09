@@ -28,6 +28,9 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-https://igoralves1.github.io}
       SEED_ON_START: ${SEED_ON_START:-true}
       RELOAD: ${RELOAD:-true}
+      BANCO_CONSULTAS: ${BANCO_CONSULTAS:-true}
+      BANCO_TEMPO_MS: ${BANCO_TEMPO_MS:-5000}
+      BANCO_LEITURA_SENHA: ${BANCO_LEITURA_SENHA:-}
     ports:
       - "${API_PORT:-8000}:8000"
     # desenvolvimento: o código local entra no container e o uvicorn recarrega a cada mudança

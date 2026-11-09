@@ -48,6 +48,8 @@ class Concorrente(Model):
 
 
 class PrecoHora(Model):
+    """Preço por hora anunciado por um concorrente (cada faixa ou serviço numa linha)."""
+
     id = fields.IntField(primary_key=True)
     concorrente = fields.ForeignKeyField("models.Concorrente", related_name="precos_hora", on_delete=fields.CASCADE)
     label = fields.CharField(max_length=120)
@@ -109,6 +111,8 @@ class TrafegoSite(Model):
 
 
 class RedeSocial(Model):
+    """Rede social acompanhada no monitor (Instagram, Facebook, YouTube...) e por que ela importa."""
+
     id = fields.CharField(max_length=20, primary_key=True)  # instagram, facebook, youtube
     nome = fields.CharField(max_length=40)
     contas_br = fields.CharField(max_length=40, default="")
@@ -145,6 +149,8 @@ class PerfilSocial(Model):
 
 
 class PostSocial(Model):
+    """Publicação recente de um perfil: data, tipo, curtidas e legenda."""
+
     id = fields.CharField(max_length=60, primary_key=True)
     perfil = fields.ForeignKeyField("models.PerfilSocial", related_name="posts", on_delete=fields.CASCADE)
     data = fields.DateField()
@@ -160,6 +166,8 @@ class PostSocial(Model):
 
 
 class BuscaYoutube(Model):
+    """Busca no YouTube por um termo do setor e os vídeos em destaque."""
+
     id = fields.IntField(primary_key=True)
     termo = fields.CharField(max_length=200)
     analisados = fields.IntField(default=0)
