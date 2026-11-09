@@ -9,8 +9,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgres://sante:sante@localhost:5432/sante"
-    # origens do front que podem chamar a API (separadas por vírgula)
-    cors_origins: str = "https://igoralves1.github.io"
+    # origens de outro domínio que podem chamar a API (separadas por vírgula). Vazio = nenhuma:
+    # o front chama /api no mesmo endereço (load balancer em produção, proxy do Vite no npm run dev)
+    cors_origins: str = ""
     # o front rodando na máquina (npm run dev, em qualquer porta)
     cors_origin_regex: str = r"^http://(localhost|127\.0\.0\.1)(:\d+)?$"
     # carrega seed/*.json quando o banco está vazio

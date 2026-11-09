@@ -92,14 +92,17 @@ com o modelo `claude-opus-5-5` da Anthropic (`app/services/tradutor.py`).
 
 ## Ligar o front
 
-O [sante-admin](https://github.com/igoralves1/sante-admin) já fala com esta API:
+O [sante-admin](https://github.com/igoralves1/sante-admin) lê e grava todos os dados por esta API:
 
-- **Como conectar:** com a API rodando, o `npm run dev` do front conecta sozinho a `http://localhost:8000`. Também dá para conectar em **Base de dados → Servidor**.
+- **Endereço:** o front chama `/api` no mesmo endereço do site. No `npm run dev`, o Vite repassa `/api`,
+  `/openapi.json`, `/docs` e `/redoc` para `http://localhost:8000`. Em produção (ECS/Fargate), o load balancer
+  manda essas rotas para o container da API.
 - **Como sincroniza:**
-  - lê tudo em `GET /api/dados`;
+  - lê tudo em `GET /api/dados` e `GET /api/mercado/*`;
   - envia só o que mudou, pelas rotas de cada cadastro;
   - busca mudanças de outras pessoas a cada 20 segundos.
-- **Quem pode chamar a API (CORS):** o front rodando na máquina (`localhost`, em qualquer porta) e as origens em `CORS_ORIGINS` (por padrão, o GitHub Pages).
+- **CORS:** com front e API no mesmo endereço, não é preciso. `CORS_ORIGINS` só serve se o front ficar em outro
+  domínio; o front rodando na máquina (`localhost`, em qualquer porta) é sempre aceito.
 
 ## Estrutura
 

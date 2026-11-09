@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-sante}:${POSTGRES_PASSWORD:-sante}@db:5432/${POSTGRES_DB:-sante}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://igoralves1.github.io}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
       SEED_ON_START: ${SEED_ON_START:-true}
       RELOAD: ${RELOAD:-true}
       BANCO_CONSULTAS: ${BANCO_CONSULTAS:-true}
