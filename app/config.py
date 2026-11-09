@@ -10,7 +10,9 @@ class Settings(BaseSettings):
 
     database_url: str = "postgres://sante:sante@localhost:5432/sante"
     # origens do front que podem chamar a API (separadas por vírgula)
-    cors_origins: str = "http://localhost:5173,https://igoralves1.github.io"
+    cors_origins: str = "https://igoralves1.github.io"
+    # o front rodando na máquina (npm run dev, em qualquer porta)
+    cors_origin_regex: str = r"^http://(localhost|127\.0\.0\.1)(:\d+)?$"
     # carrega seed/*.json quando o banco está vazio
     seed_on_start: bool = True
 

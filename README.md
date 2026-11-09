@@ -52,7 +52,20 @@ No compose de desenvolvimento, a pasta `app/` entra no container e a API recarre
 | `GET` e `PUT /api/custos` | Custos fixos, impostos e comissões |
 | `GET` e `PUT /api/mercado/concorrentes`, `/api/mercado/social` | Coletas de mercado, no formato dos arquivos do front |
 
-Os campos usam camelCase, iguais aos do front (`espacoId`, `precoTurno`...). O front pode trocar a leitura do `sante.json` por `GET /api/dados` sem mudar o resto.
+Também há `GET` e `PUT /api/clinica`, para os dados da Santé e a meta de ocupação.
+
+Os campos usam camelCase, iguais aos do front (`espacoId`, `precoTurno`...).
+
+## Ligar o front
+
+O [sante-admin](https://github.com/igoralves1/sante-admin) já fala com esta API:
+
+- **Como conectar:** com a API rodando, o `npm run dev` do front conecta sozinho a `http://localhost:8000`. Também dá para conectar em **Base de dados → Servidor**.
+- **Como sincroniza:**
+  - lê tudo em `GET /api/dados`;
+  - envia só o que mudou, pelas rotas de cada cadastro;
+  - busca mudanças de outras pessoas a cada 20 segundos.
+- **Quem pode chamar a API (CORS):** o front rodando na máquina (`localhost`, em qualquer porta) e as origens em `CORS_ORIGINS` (por padrão, o GitHub Pages).
 
 ## Estrutura
 

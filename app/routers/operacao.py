@@ -88,15 +88,16 @@ async def criar_agendamento(dados: s.Agendamento):
     return ser.agendamento(await gravar.gravar_agendamento(dados))
 
 
-@router.post("/agendamentos/lote", tags=["agenda"], status_code=201, summary="Vários dias de uma vez (repetir no mês ou no ano); tudo ou nada")
+@router.post("/agendamentos/lote", tags=["agenda"], status_code=201, summary="Vários agendamentos de uma vez (repetir no mês ou no ano); tudo ou nada")
 async def criar_lote(itens: list[s.Agendamento]):
     if not itens:
         raise HTTPException(422, "Envie pelo menos um agendamento.")
-    grupo = itens[0].grupo or (ser.uid("g") if len(itens) > 1 else "")
+    # cada item mantém o grupo que veio; sem grupo nenhum, os itens viram uma repetição só
+    novo = ser.uid("g") if len(itens) > 1 and not any(d.grupo for d in itens) else ""
     async with in_transaction():
         criados = []
         for d in itens:
-            d.grupo = grupo
+            d.grupo = d.grupo or novo
             await _validar_agendamento(d)
             criados.append(ser.agendamento(await gravar.gravar_agendamento(d)))
     return criados

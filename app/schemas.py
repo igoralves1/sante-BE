@@ -190,6 +190,13 @@ class Metas(Schema):
     ocupacao_alvo: float = Field(default=0.6, ge=0, le=1)
 
 
+class ClinicaDados(Schema):
+    """Dados da Santé e meta de ocupação (`meta` e `metas` do sante.json)."""
+
+    meta: Meta = Meta()
+    metas: Metas = Metas()
+
+
 class Documento(Schema):
     meta: Meta = Meta()
     metas: Metas = Metas()

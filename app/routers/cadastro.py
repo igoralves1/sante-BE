@@ -8,11 +8,40 @@ from tortoise.transactions import in_transaction
 from app import models as m
 from app import schemas as s
 from app.routers.comum import achar, validar_mes
-from app.services import gravar
+from app.services import documento, gravar
 from app.services import serializar as ser
 from app.services.capacidade import capacidade_mes
 
 router = APIRouter()
+
+
+# ---------- clínica ----------
+@router.get("/clinica", tags=["clínica"], summary="Dados da Santé e meta de ocupação")
+async def ler_clinica():
+    doc = await documento.exportar()
+    if not doc:
+        raise HTTPException(404, "Banco vazio. Importe um sante.json em PUT /api/dados.")
+    return {"meta": doc["meta"], "metas": doc["metas"]}
+
+
+@router.put("/clinica", tags=["clínica"])
+async def salvar_clinica(dados: s.ClinicaDados):
+    c = await m.Clinica.first()
+    if c is None:
+        raise HTTPException(404, "Banco vazio. Importe um sante.json em PUT /api/dados.")
+    c.update_from_dict({
+        "nome": dados.meta.clinica,
+        "razao_social": dados.meta.razao_social,
+        "endereco": dados.meta.endereco,
+        "telefone": dados.meta.telefone,
+        "whatsapp": dados.meta.whatsapp,
+        "site": dados.meta.site,
+        "instagram": dados.meta.instagram,
+        "dados_atualizados_em": dados.meta.atualizado_em,
+        "ocupacao_alvo": dados.metas.ocupacao_alvo,
+    })
+    await c.save()
+    return await ler_clinica()
 
 
 # ---------- turnos da Santé ----------
