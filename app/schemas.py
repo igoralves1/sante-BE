@@ -515,6 +515,8 @@ class TabelaEsquema(Schema):
     chave_primaria: list[str]
     unicas: list[list[str]] = Field(description="Restrições UNIQUE (cada uma, uma lista de colunas).")
     indices: list[Indice]
+    usos: list[str] = Field(default_factory=list, description="Casos de uso: para que a tabela serve no sistema.")
+    telas: list[str] = Field(default_factory=list, description="Páginas do Santé Admin que usam a tabela.")
 
 
 class Relacao(Schema):

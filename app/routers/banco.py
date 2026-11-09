@@ -18,6 +18,7 @@ from tortoise.models import Model
 from app import models as m
 from app import schemas as s
 from app.config import get_settings
+from app.guia_tabelas import GUIA
 from app.routers.comum import ERRO_400, ERRO_403, ERRO_404, ERRO_422
 from app.services import tradutor
 
@@ -197,6 +198,8 @@ async def ler_esquema() -> dict:
             "chavePrimaria": [],
             "unicas": [],
             "indices": [],
+            "usos": GUIA.get(t, {}).get("usos", []),
+            "telas": GUIA.get(t, {}).get("telas", []),
         }
         for t in nomes
     }
