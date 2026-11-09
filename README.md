@@ -56,6 +56,9 @@ No compose de desenvolvimento, a pasta `app/` entra no container e a API recarre
 | `GET /api/banco/esquema` | Tabelas, colunas, chaves, índices e relações do banco (alimenta o diagrama do front) |
 | `GET /api/banco/tabelas/{tabela}` | Linhas de uma tabela, com página, ordem e busca |
 | `POST /api/banco/consulta` | Roda uma consulta SQL só de leitura |
+| `POST /api/banco/traduzir` | Traduz uma pergunta em português para SQL, com o Claude (precisa de `ANTHROPIC_API_KEY`) |
+| `GET /api/banco/assistente` | Diz se a tradução está disponível |
+| `GET` e `PUT /api/banco/diagrama` | Posições das tabelas arrumadas à mão no diagrama do front |
 
 Também há `GET` e `PUT /api/clinica`, para os dados da Santé e a meta de ocupação.
 
@@ -72,6 +75,20 @@ Elas nunca usam a conexão principal da API:
 - só um comando por vez, e no máximo 5.000 linhas na resposta.
 
 Para desligar a navegação e as consultas (o esquema continua disponível), use `BANCO_CONSULTAS=false`.
+
+## Perguntas em português (Claude)
+
+A aba **Perguntar** do front transforma uma pergunta ("quanto cada sala faturou neste mês?") em SQL,
+com o modelo `claude-opus-5-5` da Anthropic (`app/services/tradutor.py`).
+
+- **Configurar:** crie uma chave em console.anthropic.com, coloque `ANTHROPIC_API_KEY=...` no `.env` e rode `docker compose up -d`.
+- **O que sai do servidor:** só a pergunta, as perguntas anteriores da conversa com o SQL de cada uma, e a
+  **estrutura** do banco (tabelas, colunas, tipos, relações e valores possíveis). Nenhuma linha de dado vai para a Anthropic.
+- **Como funciona:** o modelo devolve o SQL e uma explicação; a API prepara a consulta no papel só de leitura
+  (sem executar) e, se o PostgreSQL recusar, manda o erro de volta para o modelo corrigir (até 3 tentativas).
+  O front roda o SQL em `POST /api/banco/consulta`.
+- **Custo:** cada pergunta é uma chamada paga à API da Anthropic. O esquema fica em cache no prompt, o que
+  barateia as perguntas seguintes. Os logs da API mostram os tokens de cada pergunta.
 
 ## Ligar o front
 

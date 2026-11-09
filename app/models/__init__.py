@@ -20,6 +20,7 @@ from app.models.mercado import (
     TrafegoSite,
 )
 from app.models.operacao import Agendamento, Campanha, Contrato
+from app.models.sistema import DiagramaPosicao
 
 __all__ = [
     "Agendamento",
@@ -33,6 +34,7 @@ __all__ = [
     "Contrato",
     "CustoFixo",
     "DespesaEspaco",
+    "DiagramaPosicao",
     "Espaco",
     "PerfilSocial",
     "PostSocial",

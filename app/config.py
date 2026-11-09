@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     banco_tempo_ms: int = 5000
     # senha do papel sante_leitura; vazio = aleatória a cada início (use uma fixa com vários workers)
     banco_leitura_senha: str = ""
+    # chave da API da Anthropic, para traduzir perguntas em português para SQL (Claude)
+    anthropic_api_key: str = ""
 
     @property
     def cors_list(self) -> list[str]:

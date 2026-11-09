@@ -18,12 +18,13 @@ from tortoise.models import Model
 from app import models as m
 from app import schemas as s
 from app.config import get_settings
-from app.routers.comum import ERRO_400, ERRO_403, ERRO_404
+from app.routers.comum import ERRO_400, ERRO_403, ERRO_404, ERRO_422
+from app.services import tradutor
 
 router = APIRouter(prefix="/banco", tags=["base de dados"])
 
 # grupos do diagrama (módulo do modelo no Tortoise)
-GRUPOS = {"cadastro": "Cadastro", "operacao": "Operação", "mercado": "Mercado"}
+GRUPOS = {"cadastro": "Cadastro", "operacao": "Operação", "mercado": "Mercado", "sistema": "Sistema"}
 TABELAS_EXTRAS = {
     "campanha_espaco": ("operacao", "Espaços de cada campanha (ligação muitos para muitos)."),
     "aerich": ("sistema", "Histórico das migrações aplicadas pelo Aerich."),
@@ -229,7 +230,7 @@ async def ler_esquema() -> dict:
     return {
         "banco": f"PostgreSQL {versao}",
         "geradoEm": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "grupos": {**GRUPOS, "sistema": "Sistema"},
+        "grupos": GRUPOS,
         "tabelas": list(tabelas.values()),
         "relacoes": relacoes,
     }
@@ -360,3 +361,59 @@ async def consulta(dados: s.Consulta):
         "tempoMs": round((time.perf_counter() - inicio) * 1000, 1),
         "comando": sql.split(None, 1)[0].upper(),
     }
+
+
+# ---------- perguntas em português -> SQL ----------
+@router.get("/assistente", summary="O assistente de SQL está disponível?", response_model=s.Assistente)
+async def assistente():
+    """Diz se o servidor tem chave da API da Anthropic para traduzir perguntas em SQL."""
+    return {"disponivel": tradutor.disponivel(), "modelo": tradutor.MODELO}
+
+
+@router.post(
+    "/traduzir",
+    summary="Traduz uma pergunta em português para SQL",
+    response_model=s.Traducao,
+    responses={
+        **ERRO_403, **ERRO_422,
+        429: {"model": s.Erro, "description": "Muitas perguntas seguidas."},
+        502: {"model": s.Erro, "description": "A API da Anthropic falhou."},
+        503: {"model": s.Erro, "description": "Sem chave da API da Anthropic, ou sem conexão com ela."},
+    },
+)
+async def traduzir(dados: s.Pergunta):
+    """Usa o Claude (`claude-opus-5-5`) para escrever uma consulta PostgreSQL que responde à pergunta.
+
+    - Vão para a Anthropic só a **estrutura** do banco (tabelas, colunas, tipos, relações e valores
+      possíveis dos campos de lista), as regras do negócio e a pergunta. **Nenhuma linha de dado sai do servidor.**
+    - Antes de responder, a consulta é preparada no PostgreSQL (papel `sante_leitura`, sem executar).
+      Se o banco recusar, o erro volta para o modelo corrigir (até 3 tentativas).
+    - A rota **não executa** a consulta: o front roda o SQL devolvido em `POST /api/banco/consulta`.
+    - `historico` permite perguntas de continuação; `sqlAtual` permite pedir ajustes no SQL do editor.
+
+    Precisa de `ANTHROPIC_API_KEY` no `.env` do servidor."""
+    _exigir_consultas()
+    esquema = await ler_esquema()
+    return await tradutor.traduzir(
+        dados.pergunta, [h.model_dump() for h in dados.historico], dados.sql_atual, esquema
+    )
+
+
+# ---------- posições do diagrama ----------
+@router.get("/diagrama", summary="Posições salvas das tabelas no diagrama", response_model=s.Posicoes)
+async def ler_posicoes():
+    """Posição de cada tabela arrastada na página **Diagrama do banco**. Vazio = arrumação automática."""
+    return {"posicoes": {p.tabela: {"x": p.x, "y": p.y} for p in await m.DiagramaPosicao.all()}}
+
+
+@router.put("/diagrama", summary="Salva as posições das tabelas no diagrama", response_model=s.Posicoes, responses=ERRO_422)
+async def salvar_posicoes(dados: s.Posicoes):
+    """Substitui todas as posições salvas. Envie `{"posicoes": {}}` para voltar à arrumação automática."""
+    from tortoise.transactions import in_transaction
+
+    async with in_transaction():
+        await m.DiagramaPosicao.all().delete()
+        await m.DiagramaPosicao.bulk_create(
+            [m.DiagramaPosicao(tabela=k[:63], x=round(p.x, 1), y=round(p.y, 1)) for k, p in dados.posicoes.items()]
+        )
+    return await ler_posicoes()

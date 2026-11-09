@@ -31,6 +31,7 @@ services:
       BANCO_CONSULTAS: ${BANCO_CONSULTAS:-true}
       BANCO_TEMPO_MS: ${BANCO_TEMPO_MS:-5000}
       BANCO_LEITURA_SENHA: ${BANCO_LEITURA_SENHA:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
       - "${API_PORT:-8000}:8000"
     # desenvolvimento: o código local entra no container e o uvicorn recarrega a cada mudança

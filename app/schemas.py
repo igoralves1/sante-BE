@@ -532,3 +532,49 @@ class Esquema(Schema):
     grupos: dict[str, str] = Field(description="Código do grupo → nome para mostrar.")
     tabelas: list[TabelaEsquema]
     relacoes: list[Relacao]
+
+
+# ---------- assistente de SQL e posições do diagrama ----------
+class Troca(Schema):
+    pergunta: str
+    sql: str
+
+
+class Pergunta(Schema):
+    """Pergunta em português para virar SQL."""
+
+    model_config = exemplos({
+        "pergunta": "Quanto cada sala faturou com locações neste mês?",
+        "historico": [],
+        "sqlAtual": "",
+    })
+
+    pergunta: str = Field(min_length=2, max_length=2000, description="A pergunta, em português.")
+    historico: list[Troca] = Field([], max_length=20, description="Perguntas anteriores e o SQL de cada uma, para perguntas de continuação (\"agora só da Sala 1\").")
+    sql_atual: str = Field("", max_length=20000, description="SQL que está no editor, para pedidos de ajuste.")
+
+
+class Traducao(Schema):
+    pode_responder: bool = Field(description="Falso quando os dados do banco não respondem à pergunta.")
+    sql: str = Field(description="Consulta pronta para `POST /api/banco/consulta`. Vazia quando `podeResponder` é falso.")
+    explicacao: str = Field(description="O que a consulta mostra e as premissas assumidas, em português simples.")
+    tentativas: int = Field(description="Quantas vezes o modelo precisou escrever a consulta até o PostgreSQL aceitar.")
+    modelo: str = Field(description="Modelo do Claude que respondeu.")
+
+
+class Assistente(Schema):
+    disponivel: bool = Field(description="Há chave da API da Anthropic configurada no servidor.")
+    modelo: str
+
+
+class Ponto(BaseModel):
+    x: float
+    y: float
+
+
+class Posicoes(Schema):
+    """Posição (canto superior esquerdo) de cada tabela no diagrama."""
+
+    model_config = exemplos({"posicoes": {"espaco": {"x": 0, "y": 44}, "contrato": {"x": 420, "y": 44}}})
+
+    posicoes: dict[str, Ponto] = Field(description="Nome da tabela → posição. Tabelas fora da lista usam a arrumação automática.")
