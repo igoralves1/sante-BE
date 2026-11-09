@@ -1,0 +1,5 @@
+fastapi==0.162.2
+uvicorn[standard]==0.54.0
+tortoise-orm[asyncpg]==1.1.9
+aerich==0.10.1
+pydantic-settings==2.16.2

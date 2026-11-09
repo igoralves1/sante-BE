@@ -1,0 +1,10 @@
+[project]
+name = "sante-be"
+version = "0.1.0"
+description = "Backend do Santé Admin: FastAPI + Tortoise ORM + Aerich + PostgreSQL"
+requires-python = ">=3.12"
+
+[tool.aerich]
+tortoise_orm = "app.db.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./."
